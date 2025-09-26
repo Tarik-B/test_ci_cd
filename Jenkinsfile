@@ -15,7 +15,10 @@ pipeline {
                 stages {
                     stage('Build') {
                         steps {
-                            echo 'Do Build ${BUILD_TYPE}'
+//                             script {
+//                                 env.BUILD_TYPE='${BUILD_TYPE}'
+//                             }
+                            echo "Do Build ${env.BUILD_TYPE}"
                             sh 'rm -rf builds/build_${BUILD_TYPE}'
                             sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
                             sh 'cmake --build builds/build_${BUILD_TYPE}'
@@ -24,6 +27,7 @@ pipeline {
                     stage('Test') {
                         steps {
                             sh './builds/build_${BUILD_TYPE}/test_ci_cd'
+//                             sh './tests/robot/robot.sh'
                         }
                     }
                     stage('Deliver') {
