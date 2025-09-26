@@ -36,7 +36,7 @@ pipeline {
                 post {
                     cleanup {
                         sh 'cmake --build builds/build_${BUILD_TYPE} --target clean'
-                        //cleanWs()
+                        cleanWs()
                     }
                 }
             }
