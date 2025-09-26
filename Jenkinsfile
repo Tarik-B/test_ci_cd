@@ -29,7 +29,7 @@ pipeline {
                     stage('Deliver') {
                         steps {
                             sh 'tar -czf test_ci_cd_${BUILD_TYPE}.tar.gz builds/build_${BUILD_TYPE}/test_ci_cd'
-                            archiveArtifacts artifacts: 'test_ci_cd_${BUILD_TYPE}.tar.gz', fingerprint: true
+                            archiveArtifacts artifacts: '*.tar.gz', fingerprint: true, onlyIfSuccessful: true
                         }
                     }
                 }
