@@ -37,10 +37,19 @@
 *.out
 *.app
 
-# debug information files
+# Debug information files
 *.dwo
 
+# Build folders
 build/
 builds/
 
+# Qt Creator user settings
 *.txt.user
+
+# Robot Framework python venv
+tests/robot/.venv
+
+# Robot Framework outputs
+tests/robot/*.html
+tests/robot/*.xml
