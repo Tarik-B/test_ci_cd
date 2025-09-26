@@ -35,9 +35,10 @@ pipeline {
                                 sh './robot.sh'
                             }
                             
-                            sh 'cp tests/robot/output.xml artifacts/robot_tests_output.xml'
-                            sh 'cp tests/robot/log.html artifacts/robot_tests_log.html'
-                            sh 'cp tests/robot/report.html artifacts/robot_tests_report.html'
+                            sh 'mkdir -p artifacts/robot'
+                            
+                            // Copy all files in robot output folder
+                            sh 'cp -a tests/robot/output/. artifacts/robot'
                         }
                     }
                     stage('Deliver') {

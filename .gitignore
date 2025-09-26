@@ -51,5 +51,4 @@ builds/
 tests/robot/.venv
 
 # Robot Framework outputs
-tests/robot/*.html
-tests/robot/*.xml
+tests/robot/output

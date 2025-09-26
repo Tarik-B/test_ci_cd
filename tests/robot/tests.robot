@@ -12,11 +12,11 @@ Run executable with too many characters
     123456    1
     1    123456
 
-*** Keyword ***
+*** Keywords ***
 Executable
     [Arguments]     ${arg1}     ${arg2}
     ${result} =	Run Process	${CURDIR}/../../builds/build_${BUILD_TYPE}/test_ci_cd   ${arg1}     ${arg2}
-    [Return]    ${result}
+    RETURN    ${result}
 
 Example of valid
     [Arguments]     ${arg1}     ${arg2}

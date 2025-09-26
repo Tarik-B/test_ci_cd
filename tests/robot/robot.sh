@@ -6,7 +6,7 @@ fi
 source .venv/bin/activate
 pip install robotframework
 
-robot --variable BUILD_TYPE:${BUILD_TYPE} tests.robot
+robot --outputdir output --variable BUILD_TYPE:${BUILD_TYPE} tests.robot
 
 deactivate
 
