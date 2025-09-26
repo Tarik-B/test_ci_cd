@@ -39,6 +39,18 @@ pipeline {
                             
                             // Copy all files in robot output folder
                             sh 'cp -a tests/robot/output/. artifacts/robot'
+                            
+                            // Publish results to robot framework jenkins plugin
+                            robot(outputPath: ".",
+//                                 passThreshold: 90.0,
+//                                 unstableThreshold: 70.0,
+                                disableArchiveOutput: true,
+                                outputFileName: "artifacts/robot/output.xml",
+                                logFileName: 'artifacts/robot/log.html',
+                                reportFileName: 'artifacts/robot/report.html',
+                                countSkippedTests: true,    // Optional, defaults to false
+//                                 otherFiles: 'screenshot-*.png'
+                            )
                         }
                     }
                     stage('Deliver') {
