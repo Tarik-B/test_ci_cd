@@ -9,3 +9,5 @@ pip install robotframework
 robot --variable BUILD_TYPE:${BUILD_TYPE} tests.robot
 
 deactivate
+
+exit 0

@@ -31,8 +31,9 @@ pipeline {
                     }
                     stage('Tests') {
                         steps {
-//                             sh './builds/build_${BUILD_TYPE}/test_ci_cd'
-                            sh './tests/robot/robot.sh'
+                            dir("tests/robot") {
+                                sh './robot.sh'
+                            }
                             
                             sh 'cp tests/robot/output.xml artifacts/robot_tests_output.xml'
                             sh 'cp tests/robot/log.html artifacts/robot_tests_log.html'
