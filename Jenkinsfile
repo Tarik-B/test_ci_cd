@@ -1,8 +1,18 @@
 #!groovy
 
+def VERSION = ""
+
 pipeline {
     agent any
     stages {
+        stage('Initialization') {
+            steps {
+                script {
+                    VERSION = sh(script: "cat version.txt | xargs", returnStdout: true).trim()
+                    echo "Building version ${VERSION}, build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"
+                }
+            }
+        }
         stage('BuildTestDeliver') {
             matrix {
                 agent any
@@ -13,9 +23,11 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Initialization') {
+                    stage('Preparation') {
                         steps {
-                            sh 'echo "Building ${BUILD_TYPE} version $(cat version.txt | xargs), build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"'
+                            script {
+                                echo "Building ${BUILD_TYPE}"
+                            }
                             sh 'rm -rf builds/build_${BUILD_TYPE}'
                             sh 'rm -rf artifacts'
                             sh 'mkdir artifacts'
@@ -69,9 +81,9 @@ pipeline {
                             )
                         }
                     }
-                    stage('Deliver') {
+                    stage('Delivery') {
                         steps {
-                            sh 'tar -czf artifacts_$(cat version.txt | xargs)-build.${BUILD_NUMBER}_${BUILD_TYPE}.tar.gz artifacts'
+                            sh "tar -czf artifacts_v${VERSION}-build${BUILD_NUMBER}_${BUILD_TYPE}.tar.gz artifacts"
                             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true, onlyIfSuccessful: true
                         }
                     }
