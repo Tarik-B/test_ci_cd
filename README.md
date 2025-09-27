@@ -1,8 +1,14 @@
-# test_ci_cd
+# CMake-based C++ project with Jenkins build pipeline
 
 ## Pipeline
 
-Static code analysis → Build → Unit tests → Functional (Robot Framework) tests → Deliver
+- Buildsystem generation (CMake)
+- Static code analysis (Cppcheck)
+- Build
+- Sanity check (Valgrind's memcheck)
+- Unit tests and coverage (CTest)
+- Functional/Robot Framework tests
+- Delivery
 
 ## Todo
 
@@ -15,7 +21,6 @@ Static code analysis → Build → Unit tests → Functional (Robot Framework) t
 - code formatting: clang-format, cpplint
 - auto trigger build
 - github pull requests checks
-- github actions
 - use github actions runner to bypass nat for jenkins integration?
 - dockerize
 

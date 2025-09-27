@@ -55,7 +55,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # generates compile_commands.json
 
 ################################################################################
 # Dependencies
@@ -131,7 +131,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # Include generated files (i.e. version.h)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
-# Coverage
+# Coverage (generate .gcda/.gcno along object files)
 target_compile_options(${PROJECT_NAME} PRIVATE -coverage)
 target_link_options(${PROJECT_NAME} PRIVATE -coverage)
 

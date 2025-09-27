@@ -29,6 +29,7 @@ pipeline {
                             script {
                                 echo "Building ${BUILD_TYPE}"
                             }
+                            sh 'scripts/test.sh'
                             sh 'rm -rf builds/build_${BUILD_TYPE}'
                             sh 'rm -rf artifacts'
                             sh 'mkdir artifacts'
@@ -76,7 +77,7 @@ pipeline {
                             }
                         }
                     }
-                    stage('Robot tests') {
+                    stage('Robot Framework tests') {
                         steps {
                             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                 dir("tests/robot") {
