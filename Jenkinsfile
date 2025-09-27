@@ -15,17 +15,32 @@ pipeline {
                 stages {
                     stage('Initialization') {
                         steps {
-                            echo "Do Build ${BUILD_TYPE}"
+                            echo "Do Build BUILD_TYPE=${BUILD_TYPE} BUILD_NUMBER=${BUILD_NUMBER} GIT_COMMIT=${GIT_COMMIT} GIT_BRANCH=${GIT_BRANCH}"
                             sh 'rm -rf builds/build_${BUILD_TYPE}'
                             sh 'rm -rf artifacts'
                             sh 'mkdir artifacts'
                         }
                     }
-                    stage('Build') {
+
+                    stage('Buildsystem generation') {
                         steps {
                             sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
+                        }
+                    }
+                    stage('Static code analysis') {
+                        steps {
+                            sh 'cppcheck --enable=all --suppress=missingIncludeSystem  --suppress=checkersReport  --std=c++17 --error-exitcode=2 src/ tests/unit_tests/'
+//                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=2 src'
+//                             --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i)
+//                             --checkers-report=cppcheck.report
+//                             --inline-suppr # "unusedFunction check can't be used with '-j'"
+//                             -j 8
+                        }
+                    }
+                    stage('Build') {
+                        steps {
                             sh 'cmake --build builds/build_${BUILD_TYPE}'
-                            
+
                             sh 'cp builds/build_${BUILD_TYPE}/test_ci_cd artifacts/'
                         }
                     }
@@ -67,7 +82,7 @@ pipeline {
                 }
                 post {
                     cleanup {
-                        sh 'cmake --build builds/build_${BUILD_TYPE} --target clean'
+//                         sh 'cmake --build builds/build_${BUILD_TYPE} --target clean'
                         cleanWs()
                     }
                 }
