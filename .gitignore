@@ -41,7 +41,6 @@
 *.dwo
 
 # Build folders
-build/
 builds/
 
 # Qt Creator user settings

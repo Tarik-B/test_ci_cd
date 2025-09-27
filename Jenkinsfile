@@ -29,6 +29,11 @@ pipeline {
                             sh 'cp builds/build_${BUILD_TYPE}/test_ci_cd artifacts/'
                         }
                     }
+                    stage('Unit tests') {
+                        steps {
+                            sh 'ctest --test-dir builds/build_${BUILD_TYPE}'
+                        }
+                    }
                     stage('Tests') {
                         steps {
                             dir("tests/robot") {
