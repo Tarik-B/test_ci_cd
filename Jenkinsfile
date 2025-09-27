@@ -9,7 +9,9 @@ pipeline {
             steps {
                 script {
                     VERSION = sh(script: "cat version.txt | xargs", returnStdout: true).trim()
-                    echo "Building version ${VERSION}, build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"
+                    echo "Building version ${VERSION}, build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"                    
+                    buildName "v${VERSION}-build.${BUILD_NUMBER}"
+//                     buildDescription "Executed @ ${NODE_NAME}"
                 }
             }
         }
@@ -83,7 +85,7 @@ pipeline {
                     }
                     stage('Delivery') {
                         steps {
-                            sh "tar -czf artifacts_v${VERSION}-build${BUILD_NUMBER}_${BUILD_TYPE}.tar.gz artifacts"
+                            sh "tar -czf artifacts_v${VERSION}-build.${BUILD_NUMBER}_${BUILD_TYPE}.tar.gz artifacts"
                             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true, onlyIfSuccessful: true
                         }
                     }
