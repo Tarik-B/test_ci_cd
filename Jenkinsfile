@@ -29,10 +29,7 @@ pipeline {
                             script {
                                 echo "Building ${BUILD_TYPE}"
                             }
-                            sh 'scripts/test.sh'
-                            sh 'rm -rf builds/build_${BUILD_TYPE}'
-                            sh 'rm -rf artifacts'
-                            sh 'mkdir artifacts'
+                            sh 'scripts/0_prepare.sh'
                         }
                     }
                     stage('Buildsystem generation') {
