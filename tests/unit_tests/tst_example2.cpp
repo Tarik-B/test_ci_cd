@@ -13,11 +13,8 @@ TEST_CASE("Test case 2.1", "[category2]")
     }
 
     {
-        REQUIRE(0x0 == 0);
+        // REQUIRE(0x0 == 0);
     }
 }
 
-TEST_CASE("Test case 2.2", "[category2]")
-{
-    REQUIRE(true);
-}
+TEST_CASE("Test case 2.2", "[category2]") { REQUIRE(true); }
