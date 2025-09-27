@@ -1,7 +1,5 @@
 #!groovy
 
-// def VERSION = ""
-
 pipeline {
     agent any
     environment {
@@ -13,7 +11,6 @@ pipeline {
                 script {
                     echo "Building version ${VERSION}, build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"                    
                     buildName "v${VERSION}-build.${BUILD_NUMBER}"
-//                     buildDescription "Executed @ ${NODE_NAME}"
                 }
             }
         }
@@ -37,9 +34,16 @@ pipeline {
                             sh 'mkdir artifacts'
                         }
                     }
+                    stage('Buildsystem generation') {
+                        steps {
+                            // This generates compile_commands.json required for static analysis
+                            sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
+                        }
+                    }
                     stage('Static code analysis') {
                         steps {
-                            sh 'cppcheck --enable=all --suppress=missingIncludeSystem  --suppress=checkersReport  --std=c++17 --error-exitcode=2 src/ tests/unit_tests/'
+                            sh 'cppcheck --enable=all --suppress=missingIncludeSystem --suppress=checkersReport --std=c++17 --error-exitcode=23 src/ tests/unit_tests/'
+                            sh 'run-clang-tidy -j 8 -p builds/build_${BUILD_TYPE}' // run-clang-tidy runs clang-tidy over everything in compile_commands.json at specified path
 //                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=2 src'
 //                             --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i) and run cmake -B before this
 //                             --checkers-report=cppcheck.report
@@ -47,12 +51,19 @@ pipeline {
 //                             -j 8
                         }
                     }
+//                     --error-exitcode=<number>
                     stage('Build') {
                         steps {
-                            sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
                             sh 'cmake --build builds/build_${BUILD_TYPE}'
 
                             sh 'cp builds/build_${BUILD_TYPE}/test_ci_cd artifacts/'
+                        }
+                    }
+                    stage('Sanity check') {
+                        steps {
+                            sh 'valgrind --tool=memcheck --leak-check=full --error-exitcode=23 builds/build_${BUILD_TYPE}/test_ci_cd hello world'
+                            // --log-file=<filename> --xml=yes --xml-file=<filename>
+                            // --gen-suppressions=all --track-origins=yes
                         }
                     }
                     stage('Unit tests and coverage') {

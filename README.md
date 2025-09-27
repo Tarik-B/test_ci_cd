@@ -6,15 +6,18 @@ Static code analysis → Build → Unit tests → Functional (Robot Framework) t
 
 ## Todo
 
-- auto trigger build
 - [ok] version number
-- [ok] static analysis (cppcheck, cpplint, clang-format, gcov coverage)
-- dockerize
-- code formatting
+- [ok] static analysis: cppcheck, gcov coverage
+
 - pre commit hooks
+- valgrind, memcheck
+- other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
+- code formatting: clang-format, cpplint
+- auto trigger build
 - github pull requests checks
 - github actions
 - use github actions runner to bypass nat for jenkins integration?
+- dockerize
 
 ## Jenkins plugins
 

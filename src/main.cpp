@@ -21,6 +21,11 @@
 int main(int argc, char* argv[]) {
     // print_version();
 
+    auto test = new int;
+    *test = 23;
+    if (false)
+        delete test;  // To prevent static analysis from detecting the memleak
+
     if (argc != 3) {
         std::cout << "Error: arguments not matched" << std::endl;
         return 1;
