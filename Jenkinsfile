@@ -61,39 +61,45 @@ pipeline {
                     }
                     stage('Sanity check') {
                         steps {
-                            sh 'valgrind --tool=memcheck --leak-check=full --error-exitcode=23 builds/build_${BUILD_TYPE}/test_ci_cd hello world'
-                            // --log-file=<filename> --xml=yes --xml-file=<filename>
-                            // --gen-suppressions=all --track-origins=yes
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                sh 'valgrind --tool=memcheck --leak-check=full --error-exitcode=23 builds/build_${BUILD_TYPE}/test_ci_cd hello world'
+//                                 --log-file=<filename> --xml=yes --xml-file=<filename>
+//                                 --gen-suppressions=all --track-origins=yes
+                            }
                         }
                     }
                     stage('Unit tests and coverage') {
                         steps {
-                            sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T test'
-                            sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T coverage'
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T test'
+                                sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T coverage'
+                            }
                         }
                     }
                     stage('Robot tests') {
                         steps {
-                            dir("tests/robot") {
-                                sh './robot.sh'
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                dir("tests/robot") {
+                                    sh './robot.sh'
+                                }
+
+                                sh 'mkdir -p artifacts/robot'
+
+                                // Copy all files in robot output folder
+                                sh 'cp -a tests/robot/output/. artifacts/robot'
+
+                                // Publish results to robot framework jenkins plugin
+                                robot(outputPath: ".",
+//                                     passThreshold: 90.0,
+//                                     unstableThreshold: 70.0,
+                                    disableArchiveOutput: true,
+                                    outputFileName: "artifacts/robot/output.xml",
+                                    logFileName: 'artifacts/robot/log.html',
+                                    reportFileName: 'artifacts/robot/report.html',
+                                    countSkippedTests: true,    // Optional, defaults to false
+//                                     otherFiles: 'screenshot-*.png'
+                                )
                             }
-
-                            sh 'mkdir -p artifacts/robot'
-
-                            // Copy all files in robot output folder
-                            sh 'cp -a tests/robot/output/. artifacts/robot'
-
-                            // Publish results to robot framework jenkins plugin
-                            robot(outputPath: ".",
-//                                 passThreshold: 90.0,
-//                                 unstableThreshold: 70.0,
-                                disableArchiveOutput: true,
-                                outputFileName: "artifacts/robot/output.xml",
-                                logFileName: 'artifacts/robot/log.html',
-                                reportFileName: 'artifacts/robot/report.html',
-                                countSkippedTests: true,    // Optional, defaults to false
-//                                 otherFiles: 'screenshot-*.png'
-                            )
                         }
                     }
                     stage('Delivery') {
