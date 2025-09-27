@@ -4,14 +4,46 @@
 cmake_minimum_required(VERSION 3.16)
 
 include(FetchContent)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/CMake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(Common)
+
+#message("+++++ CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}") # test_ci_cd
+#message("+++++ CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}") # test_ci_cd/builds/XXX-Debug
 
 ################################################################################
 # Project setup
 ################################################################################
 
-project(test_ci_cd VERSION 0.1 LANGUAGES CXX)
+# Get project version from version.txt
+file(READ "version.txt" VERSION_FULL)
+string(REPLACE "." ";" VERSION_LIST ${VERSION_FULL})
+list(GET VERSION_LIST 0 VERSION_MAJOR)
+list(GET VERSION_LIST 1 VERSION_MINOR)
+list(GET VERSION_LIST 2 VERSION_PATCH)
+string(STRIP ${VERSION_FULL} VERSION_FULL) # strip leading/trailing whitespaces
+# message("+++++ VERSION_FULL = ${VERSION_FULL}")
+# message("+++++ version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
+project(test_ci_cd
+    VERSION ${VERSION_FULL}
+    LANGUAGES CXX)
+
+message(STATUS "Project version (from version.txt): ${VERSION_FULL}")
+
+# Overwrite project version with version from git tag if possible
+include(GitVersion)
+get_version_from_git()
+
+# Generate version.h
+configure_file(
+    ${CMAKE_SOURCE_DIR}/src/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/generated/version.h
+)
+
+message(STATUS "Project version (overwritten by git tag): ${PROJECT_VERSION}")
+
+# enable_testing() # automatically invoked when the CTest module is included
+include(CTest)
 
 ################################################################################
 # Compilation/link settings
@@ -23,6 +55,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ################################################################################
 # Dependencies
@@ -40,8 +73,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(libcatch2)
 include_directories(SYSTEM "${libcatch2_SOURCE_DIR}/single_include")
 list(APPEND CMAKE_MODULE_PATH "${libcatch2_SOURCE_DIR}/contrib")
-# enable_testing() # automatically invoked when the CTest module is included
-include(CTest)
 include(Catch)
 
 ################################################################################
@@ -59,43 +90,50 @@ set(PROJECT_SOURCES
 ################################################################################
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(test_ci_cd
+    qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET test_ci_cd APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(test_ci_cd SHARED
+        add_library(${PROJECT_NAME} SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(test_ci_cd
+        add_executable(${PROJECT_NAME}
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
-target_link_libraries(test_ci_cd PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.test_ci_cd)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.${PROJECT_NAME})
 endif()
-set_target_properties(test_ci_cd PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+# Include generated files (i.e. version.h)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
+
+# Coverage
+target_compile_options(${PROJECT_NAME} PRIVATE -coverage)
+target_link_options(${PROJECT_NAME} PRIVATE -coverage)
 
 ################################################################################
 # Unit tests
@@ -124,12 +162,12 @@ catch_discover_tests(${TESTS_EXE_NAME})
 ################################################################################
 
 include(GNUInstallDirs)
-install(TARGETS test_ci_cd
+install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(test_ci_cd)
+    qt_finalize_executable(${PROJECT_NAME})
 endif()

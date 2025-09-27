@@ -1,14 +1,27 @@
-#include <iostream>
-#include <string>
+#include <version.h>
+
+// #include <QApplication>
 #include <cstring>
+#include <iostream>
+// #include <string>
 
-#include <QApplication>
+// #include "mainwindow.h"
 
-#include "mainwindow.h"
+// void print_version() {
+//     std::cout << "Application Version: " << PROJECT_VERSION << std::endl;
+//     // std::cout << "Full Version: " << FULL_VERSION << std::endl;
+//     std::cout << "Version Details:" << std::endl;
+//     std::cout << "Major: " << PROJECT_VERSION_MAJOR << std::endl;
+//     std::cout << "Minor: " << PROJECT_VERSION_MINOR << std::endl;
+//     std::cout << "Patch: " << PROJECT_VERSION_PATCH << std::endl;
+//     std::cout << "Build Date: " << __DATE__ << std::endl;
+//     std::cout << "Build Time: " << __TIME__ << std::endl;
+// }
 
-int main(int argc, char* argv[])
-{
-    if( argc != 3 ) {
+int main(int argc, char* argv[]) {
+    // print_version();
+
+    if (argc != 3) {
         std::cout << "Error: arguments not matched" << std::endl;
         return 1;
     }
@@ -39,5 +52,5 @@ int main(int argc, char* argv[])
     // w.show();
     // return a.exec();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

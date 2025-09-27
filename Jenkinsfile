@@ -15,23 +15,17 @@ pipeline {
                 stages {
                     stage('Initialization') {
                         steps {
-                            echo "Do Build BUILD_TYPE=${BUILD_TYPE} BUILD_NUMBER=${BUILD_NUMBER} GIT_COMMIT=${GIT_COMMIT} GIT_BRANCH=${GIT_BRANCH}"
+                            sh 'echo "Building ${BUILD_TYPE} version $(cat version.txt | xargs), build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"'
                             sh 'rm -rf builds/build_${BUILD_TYPE}'
                             sh 'rm -rf artifacts'
                             sh 'mkdir artifacts'
-                        }
-                    }
-
-                    stage('Buildsystem generation') {
-                        steps {
-                            sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
                         }
                     }
                     stage('Static code analysis') {
                         steps {
                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem  --suppress=checkersReport  --std=c++17 --error-exitcode=2 src/ tests/unit_tests/'
 //                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=2 src'
-//                             --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i)
+//                             --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i) and run cmake -B before this
 //                             --checkers-report=cppcheck.report
 //                             --inline-suppr # "unusedFunction check can't be used with '-j'"
 //                             -j 8
@@ -39,27 +33,29 @@ pipeline {
                     }
                     stage('Build') {
                         steps {
+                            sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
                             sh 'cmake --build builds/build_${BUILD_TYPE}'
 
                             sh 'cp builds/build_${BUILD_TYPE}/test_ci_cd artifacts/'
                         }
                     }
-                    stage('Unit tests') {
+                    stage('Unit tests and coverage') {
                         steps {
-                            sh 'ctest --test-dir builds/build_${BUILD_TYPE}'
+                            sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T test'
+                            sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T coverage'
                         }
                     }
-                    stage('Tests') {
+                    stage('Robot tests') {
                         steps {
                             dir("tests/robot") {
                                 sh './robot.sh'
                             }
-                            
+
                             sh 'mkdir -p artifacts/robot'
-                            
+
                             // Copy all files in robot output folder
                             sh 'cp -a tests/robot/output/. artifacts/robot'
-                            
+
                             // Publish results to robot framework jenkins plugin
                             robot(outputPath: ".",
 //                                 passThreshold: 90.0,
@@ -75,7 +71,7 @@ pipeline {
                     }
                     stage('Deliver') {
                         steps {
-                            sh 'tar -czf artifacts_${BUILD_TYPE}.tar.gz artifacts'
+                            sh 'tar -czf artifacts_$(cat version.txt | xargs)-build.${BUILD_NUMBER}_${BUILD_TYPE}.tar.gz artifacts'
                             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true, onlyIfSuccessful: true
                         }
                     }
