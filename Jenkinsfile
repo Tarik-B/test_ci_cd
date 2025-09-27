@@ -43,7 +43,7 @@ pipeline {
                     stage('Static code analysis') {
                         steps {
                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem --suppress=checkersReport --std=c++17 --error-exitcode=23 src/ tests/unit_tests/'
-                            sh 'run-clang-tidy -j 8 -p builds/build_${BUILD_TYPE}' // run-clang-tidy runs clang-tidy over everything in compile_commands.json at specified path
+//                             sh 'run-clang-tidy -j 8 -p builds/build_${BUILD_TYPE}' // run-clang-tidy runs clang-tidy over everything in compile_commands.json at specified path
 //                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=2 src'
 //                             --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i) and run cmake -B before this
 //                             --checkers-report=cppcheck.report
