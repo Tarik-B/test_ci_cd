@@ -59,7 +59,7 @@ pipeline {
                     }
                     stage('Sanity check') {
                         steps {
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                                 sh 'valgrind --tool=memcheck --leak-check=full --error-exitcode=23 builds/build_${BUILD_TYPE}/test_ci_cd hello world'
 //                                 --log-file=<filename> --xml=yes --xml-file=<filename>
 //                                 --gen-suppressions=all --track-origins=yes
@@ -68,7 +68,7 @@ pipeline {
                     }
                     stage('Unit tests and coverage') {
                         steps {
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                                 sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T test'
                                 sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T coverage'
                             }
@@ -76,7 +76,7 @@ pipeline {
                     }
                     stage('Robot Framework tests') {
                         steps {
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                                 dir("tests/robot") {
                                     sh './robot.sh'
                                 }
