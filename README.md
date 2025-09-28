@@ -15,7 +15,6 @@
 - [ok] version number
 - [ok] static analysis: cppcheck, gcov coverage
 - [ok] valgrind, memcheck
-
 - auto trigger build
 - pre commit hooks
 - other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
