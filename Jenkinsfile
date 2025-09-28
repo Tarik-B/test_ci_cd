@@ -4,6 +4,7 @@ pipeline {
     agent any
     environment {
         VERSION = sh(script: "cat version.txt | xargs", returnStdout: true).trim()
+        PROJECT_NAME = 'test_ci_cd'
     }
     stages {
         stage('Initialization') {
@@ -29,48 +30,39 @@ pipeline {
                             script {
                                 echo "Building ${BUILD_TYPE}"
                             }
-                            sh 'scripts/0_prepare.sh'
+                            sh 'scripts/init.sh'
                         }
                     }
                     stage('Buildsystem generation') {
                         steps {
                             // This generates compile_commands.json required for static analysis
-                            sh 'cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B builds/build_${BUILD_TYPE}'
+                            sh 'scripts/configure.sh'
                         }
                     }
                     stage('Static code analysis') {
                         steps {
-                            sh 'cppcheck --enable=all --suppress=missingIncludeSystem --suppress=checkersReport --std=c++17 --error-exitcode=23 src/ tests/unit_tests/'
-//                             sh 'run-clang-tidy -j 8 -p builds/build_${BUILD_TYPE}' // run-clang-tidy runs clang-tidy over everything in compile_commands.json at specified path
-//                             sh 'cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=2 src'
-//                             --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i) and run cmake -B before this
-//                             --checkers-report=cppcheck.report
-//                             --inline-suppr # "unusedFunction check can't be used with '-j'"
-//                             -j 8
+                            sh 'scripts/analyze.sh src/ tests/unit_tests/'
                         }
                     }
 //                     --error-exitcode=<number>
                     stage('Build') {
                         steps {
-                            sh 'cmake --build builds/build_${BUILD_TYPE}'
+                            sh 'scripts/build.sh'
 
-                            sh 'cp builds/build_${BUILD_TYPE}/test_ci_cd artifacts/'
+                            sh 'cp builds/build_${BUILD_TYPE}/${PROJECT_NAME} artifacts/'
                         }
                     }
                     stage('Sanity check') {
                         steps {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                sh 'valgrind --tool=memcheck --leak-check=full --error-exitcode=23 builds/build_${BUILD_TYPE}/test_ci_cd hello world'
-//                                 --log-file=<filename> --xml=yes --xml-file=<filename>
-//                                 --gen-suppressions=all --track-origins=yes
+                                sh 'scripts/test_sanity.sh hello world'
                             }
                         }
                     }
                     stage('Unit tests and coverage') {
                         steps {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T test'
-                                sh 'ctest --test-dir builds/build_${BUILD_TYPE} -T coverage'
+                                sh 'scripts/test_units.sh'
                             }
                         }
                     }
@@ -102,7 +94,7 @@ pipeline {
                     }
                     stage('Delivery') {
                         steps {
-                            sh 'tar -czf artifacts_v${VERSION}-build.${BUILD_NUMBER}_${BUILD_TYPE}.tar.gz artifacts'
+                            sh 'scripts/package_artifacts.sh ${PROJECT_NAME}_v${VERSION}-build.${BUILD_NUMBER}_${BUILD_TYPE}'
                             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true, onlyIfSuccessful: true
                         }
                     }

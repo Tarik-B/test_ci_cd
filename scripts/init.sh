@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-source common.sh
+# script_dir=$(dirname "$0")
+# source $script_dir/common.sh
+
+# check if env variables (BUILD_TYPE, etc.) correctly set?
 
 rm -rf builds/build_${BUILD_TYPE}
 rm -rf artifacts
