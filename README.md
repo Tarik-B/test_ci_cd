@@ -23,6 +23,8 @@
 - github pull requests checks
 - use github actions runner to bypass nat for jenkins integration?
 - dockerize
+- cross compilation
+- dependency (like catch2) management via conan?
 
 ## Jenkins plugins used
 
