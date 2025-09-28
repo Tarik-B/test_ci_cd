@@ -4,7 +4,8 @@
 
 #include "common.h"
 
-TEST_CASE("Test case 1.1", "[category1]") {
+TEST_CASE("Test case 1.1", "[category1]")
+{
     INFO("Test info");
 
     {
@@ -16,4 +17,7 @@ TEST_CASE("Test case 1.1", "[category1]") {
     }
 }
 
-TEST_CASE("Test case 1.2", "[category1]") {}
+TEST_CASE("Test case 1.2", "[category1]")
+{
+
+}

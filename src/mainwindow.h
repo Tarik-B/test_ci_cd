@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -8,7 +7,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
- explicit MainWindow(QWidget *parent = nullptr);
- ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
 };
-#endif // MAINWINDOW_H
