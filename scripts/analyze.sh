@@ -4,7 +4,7 @@ script_dir=$(dirname "$0")
 source $script_dir/common.sh
 
 function print_usage {
-    echo "Usage: script.sh [files or paths to analyze]" >&2 # redirect stdout to stderr
+    echo "Usage: $0 [files or paths to analyze]" >&2 # redirect stdout to stderr
 }
 
 if [[ $# -eq 0 ]]; then

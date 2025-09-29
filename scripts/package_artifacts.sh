@@ -4,7 +4,7 @@ script_dir=$(dirname "$0")
 source $script_dir/common.sh
 
 function print_usage {
-    echo "Usage: script.sh [output package filename]" >&2 # redirect stdout to stderr
+    echo "Usage: $0 [output package filename]" >&2 # redirect stdout to stderr
 }
 
 if [[ $# -ne 1 ]]; then

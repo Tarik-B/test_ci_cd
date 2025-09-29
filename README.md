@@ -18,13 +18,15 @@
 - [X] auto trigger build  (via smee https://smee.io)
 - [X] github pull requests checks
 - [X] jenkins desktop notifications (via catlight https://catlight.io/downloads/linux/beta)
+- [X] dockerize
 - [ ] pre commit hooks
 - [ ] other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
 - [ ] code formatting: clang-format, cpplint
 - [ ] use github actions runner to bypass nat for jenkins integration?
-- [ ] dockerize
 - [ ] cross compilation
 - [ ] dependency (like catch2) management via conan?
+- [ ] use clang?
+- [ ] use ninja as generator?
 
 ## Jenkins plugins used
 

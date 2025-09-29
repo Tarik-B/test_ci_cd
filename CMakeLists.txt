@@ -7,8 +7,9 @@ include(FetchContent)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(Common)
 
-#message("+++++ CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}") # test_ci_cd
-#message("+++++ CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}") # test_ci_cd/builds/XXX-Debug
+# message(STATUS "CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}") # test_ci_cd
+# message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}") # test_ci_cd/builds/XXX-Debug
+# message(STATUS "CMAKE_CXX_COMPILER = ${CMAKE_CXX_COMPILER}")
 
 ################################################################################
 # Project setup

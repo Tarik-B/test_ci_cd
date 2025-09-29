@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function print_usage {
-    echo "Usage: script.sh [smee id]" >&2
+    echo "Usage: $0 [smee id]" >&2
 }
 
 if [[ $# -ne 1 ]]; then
