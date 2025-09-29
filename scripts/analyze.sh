@@ -14,7 +14,7 @@ fi
 
 paths="$@"
 
-cppcheck --enable=all --suppress=missingIncludeSystem --suppress=checkersReport --std=c++17 --error-exitcode=23 $paths
+cppcheck --enable=all --suppress=missingIncludeSystem --suppress=checkersReport --suppress=unmatchedSuppression --std=c++17 --error-exitcode=23 $paths
 # cppcheck --enable=all --suppress=missingIncludeSystem --error-exitcode=2 src
 # --project=builds/build_${BUILD_TYPE}/compile_commands.json # find a way to exclude moc files (-i) and run cmake -B before this
 # --checkers-report=cppcheck.report
