@@ -12,7 +12,7 @@ if [[ $# -ne 1 ]]; then
     exit 23
 fi
 
-package_filename="$@"
+package_filename=$1
 
 tar -czf $package_filename.tar.gz artifacts
 exit_if_last_result_not_zero

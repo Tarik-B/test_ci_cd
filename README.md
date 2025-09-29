@@ -12,19 +12,19 @@
 
 ## Todo
 
-- [ok] version number
-- [ok] static analysis: cppcheck, gcov coverage
-- [ok] valgrind, memcheck
-
-- pre commit hooks
-- other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
-- code formatting: clang-format, cpplint
-- auto trigger build
-- github pull requests checks
-- use github actions runner to bypass nat for jenkins integration?
-- dockerize
-- cross compilation
-- dependency (like catch2) management via conan?
+- [X] version number
+- [X] static analysis: cppcheck, gcov coverage
+- [X] valgrind, memcheck
+- [X] auto trigger build  (via smee https://smee.io)
+- [X] github pull requests checks
+- [X] jenkins desktop notifications (via catlight https://catlight.io/downloads/linux/beta)
+- [ ] pre commit hooks
+- [ ] other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
+- [ ] code formatting: clang-format, cpplint
+- [ ] use github actions runner to bypass nat for jenkins integration?
+- [ ] dockerize
+- [ ] cross compilation
+- [ ] dependency (like catch2) management via conan?
 
 ## Jenkins plugins used
 
@@ -32,11 +32,15 @@
 - [Git][jenkins_git]
 - [Build Name and Description Setter][jenkins_build_name]
 - [Workspace Cleanup][jenkins_clean]
+- [Multibranch Scan Webhook Trigger][jenkins_webhook]
+- [CatLight Notification][jenkins_catlight]
 
 [jenkins_robot]: https://plugins.jenkins.io/robot/
 [jenkins_git]: https://plugins.jenkins.io/git/
 [jenkins_build_name]: https://plugins.jenkins.io/build-name-setter/
 [jenkins_clean]: https://plugins.jenkins.io/ws-cleanup/
+[jenkins_webhook]: https://plugins.jenkins.io/multibranch-scan-webhook-trigger/
+[jenkins_catlight]: https://plugins.jenkins.io/catlight/
 
 ## Credits
 
