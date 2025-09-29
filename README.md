@@ -16,10 +16,10 @@
 - [ok] static analysis: cppcheck, gcov coverage
 - [ok] valgrind, memcheck
 
+- auto trigger build
 - pre commit hooks
 - other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
 - code formatting: clang-format, cpplint
-- auto trigger build
 - github pull requests checks
 - use github actions runner to bypass nat for jenkins integration?
 - dockerize
