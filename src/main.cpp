@@ -21,8 +21,6 @@
 int main(int argc, char* argv[]) {
     // print_version();
 
-    BUILD BREAK
-
     // auto test = new int;
     // *test = 23;
     // if (false)
