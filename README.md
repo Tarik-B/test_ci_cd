@@ -22,11 +22,13 @@
 - [ ] pre commit hooks
 - [ ] other static analyzers: clang-tidy, clazy (qt-oriented analyzer)
 - [ ] code formatting: clang-format, cpplint
-- [ ] use github actions runner to bypass nat for jenkins integration?
 - [ ] cross compilation
 - [ ] dependency (like catch2) management via conan?
 - [ ] use clang?
 - [ ] use ninja as generator?
+- [ ] separate debug symbols? (+ generate symbols in release too)
+- [ ] JCasC (Jenkins Configuration as Code)?
+- [ ] ~~use github actions runner to bypass nat for jenkins integration?~~
 
 ## Jenkins plugins used
 
