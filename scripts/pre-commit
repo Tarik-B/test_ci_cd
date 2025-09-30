@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+echo "Running pre-commit hook..."
+# echo "arguments = $@"
+
+# Redirect output to stderr.
+exec 1>&2
+
+# test if src/unit tests files are in commit
+files=$(git --no-pager diff --staged --name-only src/ tests/unit_tests/) # returns one file per line
+
+# echo "files = $files"
+
+# for filename in "$files" ; do # won't work
+echo "$files" | while read filename ; do # iterates on lines
+    if [[ "$filename" =~ \.(h|hpp|cpp)$ ]] ; then
+        echo "yes! $filename is cpp"
+    else
+        echo "no, skipping $filename"
+    fi
+done
+
+# echo "pwd = `pwd`"
+
+# scripts/analyze.sh $files
+# scripts/test_sanity.sh hello world
+# scripts/test_units.sh
+
+exit 23
+
+# exit 0
