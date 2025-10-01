@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 function print_usage {
-    echo "Usage: $0 [smee id]" >&2
+    echo "usage: $0 <smee-id>" >&2
 }
 
-if [[ $# -ne 1 ]] ; then
+if [[ $# != 1 ]] ; then
     print_usage
     exit 23
 fi

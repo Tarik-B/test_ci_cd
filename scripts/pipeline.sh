@@ -1,22 +1,29 @@
 #!/usr/bin/env bash
 
-# script_dir=$(dirname "$0")
-# source $script_dir/common.sh
+# export CMAKE_PREFIX_PATH=qt-install-path/6.7.2/gcc_64
+# export QT_DIR=qt-install-path/6.7.2/gcc_64/lib/cmake/Qt6/
+# export CMAKE_PREFIX_PATH=/mnt/DataLinux/Programs/qt/6.7.2/gcc_64
+# export QT_DIR=/mnt/DataLinux/Programs/qt/6.7.2/gcc_64/lib/cmake/Qt6/
 
-# usage: ./pipeline.sh --init --configure --analyze --build --sanity --test --robot --package --all --all-build-only
+# required environment variables: BUILD_NUMBER
+
+script_dir=$(dirname "$0")
+source $script_dir/common.sh
+
+# usage: ./pipeline.sh --configure --analyze --build --sanity --test --robot --package --all --all-build-only
 function print_usage {
-    echo "Usage: $0 [-i | --init] [-c | --configure] [-l | --analyze] [-b | --build] [-s | --sanity] [-t | --test] [-r | --robot] [-p | --package]
-    or $0 [ -a | --all ]
-    or $0 [ -o | --all-build-only  ]" >&2 # redirect stdout to stderr
+    echo "usage: $0 [-c | --configure] [-l | --analyze] [-b | --build] [-s | --sanity] [-t | --test] [-r | --robot] [-p | --package] <build-type>
+    or $0 [ -a | --all ] <build-type>
+    or $0 [ -o | --all-build-only  ] <build-type>" >&2 # redirect stdout to stderr
 #     exit 2
 }
 
 # use "$@" to let command-line parameters expand to separate words
 # options=$(getopt -n "pipeline" -a --options "a,b:,c::,h" --longoptions "a-long,b-long:,c-long::,help" -- "$@")
-options=$(getopt -n "pipeline" -a --options "i,c,l,b,s,t,r,p,a,o,h" --longoptions "init,configure,analyze,build,sanity,test,robot,package,all,all-build-only,help" -- "$@")
+options=$(getopt -n "pipeline" -a --options "c,l,b,s,t,r,p,a,o,h" --longoptions "configure,analyze,build,sanity,test,robot,package,all,all-build-only,help" -- "$@")
 
 valid_arguments=$# # the count of arguments that are in short or long options
-if [ $? -ne 0 ] || [ $valid_arguments -eq 0 ] ; then
+if [[ $? != 0 ]] || [[ $valid_arguments == 0 ]] ; then
     print_usage
     exit 23
 fi
@@ -24,9 +31,9 @@ fi
 eval set -- "$options"
 unset options
 
-declare -A pipeline_options=( ["init"]=false ["configure"]=false ["analyze"]=false ["build"]=false ["sanity"]=false ["test"]=false ["robot"]=false ["package"]=false )
+declare -A pipeline_options=( ["configure"]=false ["analyze"]=false ["build"]=false ["sanity"]=false ["test"]=false ["robot"]=false ["package"]=false )
 
-# ${pipeline_options[init]} # value
+# ${pipeline_options[configure]} # value
 # ${!pipeline_options[@]} # all keys
 # ${pipeline_options[@]} # all values
 
@@ -43,14 +50,12 @@ while true ; do
             continue
         ;;
         "-o"|"--all-build-only")
-#             pipeline_options["init"]=true
             pipeline_options["configure"]=true
             pipeline_options["build"]=true
             shift
             continue
         ;;
         
-        "-i"|"--init") pipeline_options["init"]=true ; shift ; continue ;;
         "-c"|"--configure") pipeline_options["configure"]=true ; shift ; continue ;;
         "-l"|"--analyze") pipeline_options["analyze"]=true ; shift ; continue ;;
         "-b"|"--build") pipeline_options["build"]=true ; shift ; continue ;;
@@ -71,22 +76,52 @@ while true ; do
     esac
 done
 
-# echo "Remaining arguments:"
-# for arg; do
+# echo "remaining arguments: count = $#, value = $@"
+# for arg in "$@" ; do
+# for arg ; do # same as above but shorter
 #     echo "--> '$arg'"
 # done
 
-for key in "${!pipeline_options[@]}"; do echo "$key -> ${pipeline_options[$key]}" ; done
+if [[ $# != 1 ]] ; then
+    print_usage
+    exit 23
+fi
 
-# if ${pipeline_options["init"]} ; then scripts/init.sh ; fi
-# if ${pipeline_options["configure"]} ; then scripts/configure.sh ; fi
-# if ${pipeline_options["analyze"]} ; then scripts/analyze.sh src/ tests/unit_tests/ ; fi
-# if ${pipeline_options["build"]} ; then scripts/build.sh ; fi
-# if ${pipeline_options["sanity"]} ; then scripts/test_sanity.sh hello world ; fi
-# if ${pipeline_options["test"]} ; then scripts/test_units.sh ; fi
-# if ${pipeline_options["robot"]} ; then  ; fi
-# if ${pipeline_options["package"]} ; then scripts/package_artifacts.sh ${PROJECT_NAME}_v${VERSION}-build.${BUILD_NUMBER}_${BUILD_TYPE} ; fi
+build_type=$1
 
-# exit_if_last_result_not_zero
+# for key in "${!pipeline_options[@]}"; do echo "$key -> ${pipeline_options[$key]}" ; done
+
+# BUILD_NUMBER is an optional environment variable (only set by jenkins), set it if not already
+if ! env | grep -q '^BUILD_NUMBER=' ; then
+   export BUILD_NUMBER=0
+fi
+
+# if ${pipeline_options["init"]} ; then
+version=$(cat version.txt | xargs)
+project_name=$(basename "$PWD")
+# fi
+
+echo "pipeline params: version=${version}, project_name=${project_name}, build_type=$build_type, BUILD_NUMBER=$BUILD_NUMBER"
+
+# exit 0
+
+# set -x
+
+if ${pipeline_options["configure"]} ; then scripts/configure.sh $build_type ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["analyze"]} ; then scripts/analyze.sh src/ tests/unit_tests/ ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["build"]} ; then scripts/build.sh $build_type ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["sanity"]} ; then scripts/test_sanity.sh builds/build_${build_type}/${project_name} hello world ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["test"]} ; then scripts/test_units.sh $build_type ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["robot"]} ; then scripts/test_robot.sh builds/build_${build_type}/${project_name} tests/robot/tests.robot ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["package"]} ; then scripts/package_artifacts.sh builds/build_${build_type}/${project_name} tests/robot/output/ ${project_name}_v${version}-build.${BUILD_NUMBER}_${build_type} ; exit_if_last_result_not_zero ; fi
+
+# set +x
+
+# ansi escape codes
+red='\033[0;31m'
+green='\033[0;32m'
+uncolored='\033[0m' # No Color
+
+echo -e "pipeline ${green}successful${uncolored}!"
 
 exit 0

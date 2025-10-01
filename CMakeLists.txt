@@ -26,23 +26,36 @@ string(STRIP ${VERSION_FULL} VERSION_FULL) # strip leading/trailing whitespaces
 # message("+++++ VERSION_FULL = ${VERSION_FULL}")
 # message("+++++ version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
-project(test_ci_cd
+message(STATUS "Project version (from version.txt): ${VERSION_FULL}")
+
+execute_process(
+    COMMAND bash "-c" "basename \"$PWD\""
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE BASENAME_OUTPUT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE BASENAME_RESULT
+)
+message(STATUS "Project name (from working directory): ${BASENAME_OUTPUT}")
+
+if(NOT BASENAME_RESULT EQUAL 0)
+    message(FATAL_ERROR "failed to get project name (working directory name)")
+    return()
+endif()
+
+project(${BASENAME_OUTPUT}
     VERSION ${VERSION_FULL}
     LANGUAGES CXX)
 
-message(STATUS "Project version (from version.txt): ${VERSION_FULL}")
-
 # Overwrite project version with version from git tag if possible
-include(GitVersion)
-get_version_from_git()
+# include(GitVersion)
+# get_version_from_git()
+# message(STATUS "Project version (overwritten by git tag): ${PROJECT_VERSION}")
 
 # Generate version.h
 configure_file(
     ${CMAKE_SOURCE_DIR}/src/version.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/generated/version.h
 )
-
-message(STATUS "Project version (overwritten by git tag): ${PROJECT_VERSION}")
 
 # enable_testing() # automatically invoked when the CTest module is included
 include(CTest)
@@ -112,6 +125,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/g
 # Coverage (generate .gcda/.gcno along object files)
 target_compile_options(${PROJECT_NAME} PRIVATE -coverage)
 target_link_options(${PROJECT_NAME} PRIVATE -coverage)
+
+# Enable separate debug information for the given target
+# include(QtSeparateDebugInfo)
+# qt_enable_separate_debug_info(${PROJECT_NAME} ${CMAKE_CURRENT_BINARY_DIR})
 
 ################################################################################
 # Unit tests

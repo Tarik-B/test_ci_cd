@@ -3,13 +3,14 @@
 pipeline {
     agent any
     environment {
-        VERSION = sh(script: "cat version.txt | xargs", returnStdout: true).trim()
-        PROJECT_NAME = 'test_ci_cd'
+        VERSION = sh(script: 'cat version.txt | xargs', returnStdout: true).trim()
+        PROJECT_NAME = sh(script: 'basename "$PWD"', returnStdout: true)
     }
     stages {
         stage('Initialization') {
             steps {
                 script {
+//                     sh 'scripts/pipeline.sh --init' // sets up VERSION and PROJECT_NAME env variables but those will be lost on subshell termination
                     echo "Building version ${VERSION}, build ${BUILD_NUMBER} (commit ${GIT_COMMIT} on branch ${GIT_BRANCH})"                    
                     buildName "v${VERSION}-build.${BUILD_NUMBER}"
                 }
@@ -25,67 +26,51 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Preparation') {
-                        steps {
-                            script {
-                                echo "Building ${BUILD_TYPE}"
-                            }
-                            sh 'scripts/init.sh'
-                        }
-                    }
                     stage('Buildsystem generation') {
                         steps {
-                            // This generates compile_commands.json required for static analysis
-                            sh 'scripts/configure.sh'
+                            // generates compile_commands.json required for static analysis
+                            sh 'scripts/pipeline.sh --configure ${BUILD_TYPE}'
                         }
                     }
                     stage('Static code analysis') {
                         steps {
-                            sh 'scripts/analyze.sh src/ tests/unit_tests/'
+                            sh 'scripts/pipeline.sh --analyze ${BUILD_TYPE}'
                         }
                     }
-//                     --error-exitcode=<number>
                     stage('Build') {
                         steps {
-                            sh 'scripts/build.sh'
-
-                            sh 'cp builds/build_${BUILD_TYPE}/${PROJECT_NAME} artifacts/'
+                            sh 'scripts/pipeline.sh --build ${BUILD_TYPE}'
                         }
                     }
                     stage('Sanity check') {
                         steps {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                sh 'scripts/test_sanity.sh hello world'
+                                sh 'scripts/pipeline.sh --sanity ${BUILD_TYPE}'
                             }
                         }
                     }
                     stage('Unit tests and coverage') {
                         steps {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                sh 'scripts/test_units.sh'
+                                sh 'scripts/pipeline.sh --test ${BUILD_TYPE}'
                             }
                         }
                     }
                     stage('Robot Framework tests') {
                         steps {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                dir("tests/robot") {
-                                    sh './robot.sh'
-                                }
-
-                                sh 'mkdir -p artifacts/robot'
-
-                                // Copy all files in robot output folder
-                                sh 'cp -a tests/robot/output/. artifacts/robot'
+//                                 dir("tests/robot") {
+                                sh 'scripts/pipeline.sh --robot ${BUILD_TYPE}'
+//                                 }
 
                                 // Publish results to robot framework jenkins plugin
                                 robot(outputPath: ".",
 //                                     passThreshold: 90.0,
 //                                     unstableThreshold: 70.0,
                                     disableArchiveOutput: true,
-                                    outputFileName: "artifacts/robot/output.xml",
-                                    logFileName: 'artifacts/robot/log.html',
-                                    reportFileName: 'artifacts/robot/report.html',
+                                    outputFileName: "tests/robot/output/output.xml",
+                                    logFileName: 'tests/robot/output/log.html',
+                                    reportFileName: 'tests/robot/output/report.html',
                                     countSkippedTests: true,    // Optional, defaults to false
 //                                     otherFiles: 'screenshot-*.png'
                                 )
@@ -94,7 +79,7 @@ pipeline {
                     }
                     stage('Delivery') {
                         steps {
-                            sh 'scripts/package_artifacts.sh ${PROJECT_NAME}_v${VERSION}-build.${BUILD_NUMBER}_${BUILD_TYPE}'
+                            sh 'scripts/pipeline.sh --package ${BUILD_TYPE}'
                             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true, onlyIfSuccessful: true
                         }
                     }
@@ -102,6 +87,7 @@ pipeline {
                 post {
                     cleanup {
 //                         sh 'cmake --build builds/build_${BUILD_TYPE} --target clean'
+                        sh 'rm -rf build builds/build_${BUILD_TYPE}'
                         cleanWs()
                     }
                 }

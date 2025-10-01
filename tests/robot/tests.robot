@@ -15,7 +15,7 @@ Run executable with too many characters
 *** Keywords ***
 Executable
     [Arguments]     ${arg1}     ${arg2}
-    ${result} =	Run Process	${CURDIR}/../../builds/build_${BUILD_TYPE}/test_ci_cd   ${arg1}     ${arg2}
+    ${result} =	Run Process	${EXECUTABLE_PATH}   ${arg1}     ${arg2}
     RETURN    ${result}
 
 Example of valid

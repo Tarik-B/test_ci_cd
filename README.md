@@ -28,6 +28,7 @@
 - [ ] use ninja as generator?
 - [ ] separate debug symbols? (+ generate symbols in release too)
 - [ ] JCasC (Jenkins Configuration as Code)?
+- [ ] git checkout only once (for both debug and release)
 - [ ] ~~use github actions runner to bypass nat for jenkins integration?~~
 
 ## Jenkins plugins used

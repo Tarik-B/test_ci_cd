@@ -4,17 +4,31 @@ script_dir=$(dirname "$0")
 source $script_dir/common.sh
 
 function print_usage {
-    echo "Usage: $0 [output package filename]" >&2 # redirect stdout to stderr
+    echo "usage: $0 <executable-path> <robot-output-path> <output-package-filename>" >&2
 }
 
-if [[ $# -ne 1 ]] ; then
+if [[ $# != 3 ]] ; then
     print_usage
     exit 23
 fi
 
-package_filename=$1
+executable_path="$1"
+robot_output_path="$2"
+package_filename=$3
+
+mkdir artifacts
+
+cp "$executable_path" artifacts/
+exit_if_last_result_not_zero
+
+mkdir -p artifacts/robot
+
+cp -a "$robot_output_path/." artifacts/robot
+exit_if_last_result_not_zero
 
 tar -czf $package_filename.tar.gz artifacts
 exit_if_last_result_not_zero
+
+rm -rf artifacts
 
 exit 0

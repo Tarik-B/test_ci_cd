@@ -3,10 +3,21 @@
 script_dir=$(dirname "$0")
 source $script_dir/common.sh
 
-ctest --test-dir builds/build_${BUILD_TYPE} -T test
+function print_usage {
+    echo "usage: $0 <build-type>" >&2
+}
+
+if [[ $# != 1 ]] ; then
+    print_usage
+    exit 23
+fi
+
+build_type=$1
+
+ctest --test-dir builds/build_$build_type -T test
 exit_if_last_result_not_zero
 
-ctest --test-dir builds/build_${BUILD_TYPE} -T coverage
+ctest --test-dir builds/build_$build_type -T coverage
 exit_if_last_result_not_zero
 
 exit 0
