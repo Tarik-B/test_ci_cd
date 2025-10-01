@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-# export CMAKE_PREFIX_PATH=qt-install-path/6.7.2/gcc_64
-# export QT_DIR=qt-install-path/6.7.2/gcc_64/lib/cmake/Qt6/
-# export CMAKE_PREFIX_PATH=/mnt/DataLinux/Programs/qt/6.7.2/gcc_64
-# export QT_DIR=/mnt/DataLinux/Programs/qt/6.7.2/gcc_64/lib/cmake/Qt6/
-
-# required environment variables: BUILD_NUMBER
+# required environment variables:
+#     CMAKE_PREFIX_PATH (qt-install-path/6.7.2/gcc_64)
+#     QT_DIR (qt-install-path/6.7.2/gcc_64/lib/cmake/Qt6/)
+# optional environment variables: BUILD_NUMBER
 
 script_dir=$(dirname "$0")
-source $script_dir/common.sh
+source $script_dir/pipeline/common.sh
 
 # usage: ./pipeline.sh --configure --analyze --build --sanity --test --robot --package --all --all-build-only
 function print_usage {
@@ -17,6 +15,14 @@ function print_usage {
     or $0 [ -o | --all-build-only  ] <build-type>" >&2 # redirect stdout to stderr
 #     exit 2
 }
+
+# if ! env | grep -q '^CMAKE_PREFIX_PATH=' ; then
+#     echo "CMAKE_PREFIX_PATH must be set" >&2
+#     exit 23
+# elif ! env | grep -q '^QT_DIR=' ; then
+#     echo "QT_DIR must be set" >&2
+#     exit 23
+# fi
 
 # use "$@" to let command-line parameters expand to separate words
 # options=$(getopt -n "pipeline" -a --options "a,b:,c::,h" --longoptions "a-long,b-long:,c-long::,help" -- "$@")
@@ -107,13 +113,13 @@ echo "pipeline params: version=${version}, project_name=${project_name}, build_t
 
 # set -x
 
-if ${pipeline_options["configure"]} ; then scripts/configure.sh $build_type ; exit_if_last_result_not_zero ; fi
-if ${pipeline_options["analyze"]} ; then scripts/analyze.sh src/ tests/unit_tests/ ; exit_if_last_result_not_zero ; fi
-if ${pipeline_options["build"]} ; then scripts/build.sh $build_type ; exit_if_last_result_not_zero ; fi
-if ${pipeline_options["sanity"]} ; then scripts/test_sanity.sh builds/build_${build_type}/${project_name} hello world ; exit_if_last_result_not_zero ; fi
-if ${pipeline_options["test"]} ; then scripts/test_units.sh $build_type ; exit_if_last_result_not_zero ; fi
-if ${pipeline_options["robot"]} ; then scripts/test_robot.sh builds/build_${build_type}/${project_name} tests/robot/tests.robot ; exit_if_last_result_not_zero ; fi
-if ${pipeline_options["package"]} ; then scripts/package_artifacts.sh builds/build_${build_type}/${project_name} tests/robot/output/ ${project_name}_v${version}-build.${BUILD_NUMBER}_${build_type} ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["configure"]} ; then scripts/pipeline/configure.sh $build_type ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["analyze"]} ; then scripts/pipeline/analyze.sh src/ tests/unit_tests/ ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["build"]} ; then scripts/pipeline/build.sh $build_type ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["sanity"]} ; then scripts/pipeline/test_sanity.sh builds/build_${build_type}/${project_name} hello world ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["test"]} ; then scripts/pipeline/test_units.sh $build_type ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["robot"]} ; then scripts/pipeline/test_robot.sh builds/build_${build_type}/${project_name} tests/robot/tests.robot ; exit_if_last_result_not_zero ; fi
+if ${pipeline_options["package"]} ; then scripts/pipeline/package.sh builds/build_${build_type}/${project_name} tests/robot/output/ ${project_name}_v${version}-build.${BUILD_NUMBER}_${build_type} ; exit_if_last_result_not_zero ; fi
 
 # set +x
 
