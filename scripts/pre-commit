@@ -28,6 +28,6 @@ if [ $result -ne 0 ] ; then
     exit $result
 fi
 
-exit 23
+# exit 23
 
 exit 0

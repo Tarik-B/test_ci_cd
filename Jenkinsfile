@@ -59,9 +59,7 @@ pipeline {
                     stage('Robot Framework tests') {
                         steps {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-//                                 dir("tests/robot") {
                                 sh 'scripts/pipeline.sh --robot ${BUILD_TYPE}'
-//                                 }
 
                                 // Publish results to robot framework jenkins plugin
                                 robot(outputPath: ".",
