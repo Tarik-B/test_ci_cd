@@ -1,6 +1,6 @@
 # CMake-based C++ project with Jenkins build pipeline
 
-## Pipeline
+## Jenkins pipeline overview
 
 - Buildsystem generation (CMake)
 - Static code analysis (Cppcheck)
@@ -9,6 +9,8 @@
 - Unit tests and coverage (CTest)
 - Functional/Robot Framework tests
 - Delivery
+
+<img src="pipeline.png">
 
 ## Todo
 
